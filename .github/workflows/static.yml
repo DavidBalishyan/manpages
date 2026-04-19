@@ -36,11 +36,10 @@ jobs:
         with:
           # This should point to where your index.html and /man folder are
           path: '.'
-
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps:deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }} # Changed : to . here
     runs-on: ubuntu-latest
     needs: build
     steps:
