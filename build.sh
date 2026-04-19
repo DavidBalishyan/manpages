@@ -5,58 +5,28 @@ DEST="./man"
 
 mkdir -p "$DEST"
 
-# ---- C (sections 2 & 3) ----
-for section in 2 3; do
+for section in 1 2 3 5 7; do
   mkdir -p "$DEST/$section"
 
   for file in "$SRC/man$section/"*.$section.gz; do
     name=$(basename "$file" .$section.gz)
 
-    echo "[C] $name ($section)"
+    echo "Processing $name ($section)..."
 
     {
-      echo "<!DOCTYPE html><html><head>"
-      echo "<meta charset='utf-8'>"
-      echo "<title>$name ($section)</title>"
-      echo "<link rel='stylesheet' href='../../style.css'>"
-      echo "</head><body>"
-
-      echo "<a href='../../index.html'>← Back</a><hr>"
+      echo "---"
+      echo "layout: manpage"
+      echo "title: $name"
+      echo "section: $section"
+      echo "permalink: /man/$section/$name/"
+      echo "---"
 
       gzip -dc "$file" | mandoc -Thtml
-
-      echo "</body></html>"
     } > "$DEST/$section/$name.html"
 
   done
 done
 
-# ---- Bash (filtered) ----
-BASH_CMDS=(ls grep awk sed echo cat pwd)
-
-mkdir -p "$DEST/1"
-
-for cmd in "${BASH_CMDS[@]}"; do
-  file="$SRC/man1/$cmd.1.gz"
-
-  [ -f "$file" ] || continue
-
-  echo "[BASH] $cmd"
-
-  {
-    echo "<!DOCTYPE html><html><head>"
-    echo "<meta charset='utf-8'>"
-    echo "<title>$cmd (1)</title>"
-    echo "<link rel='stylesheet' href='../../style.css'>"
-    echo "</head><body>"
-
-    echo "<a href='../../index.html'>← Back</a><hr>"
-
-    gzip -dc "$file" | mandoc -Thtml
-
-    echo "</body></html>"
-  } > "$DEST/1/$cmd.html"
-done
 
 # ---- Generate Manifest for Search ----
 echo "[" > "$DEST/manifest.json"
