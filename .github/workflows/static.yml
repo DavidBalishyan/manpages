@@ -1,0 +1,49 @@
+name: Deploy Manpages to Pages
+
+on:
+  push:
+    branches: ["main"] # Ensure this matches your default branch
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install mandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mandoc
+
+      - name: Build Manpages
+        run: |
+          chmod +x ./build.sh
+          ./build.sh
+        # This assumes your script is named build.sh in the root
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # This should point to where your index.html and /man folder are
+          path: '.'
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps:deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
